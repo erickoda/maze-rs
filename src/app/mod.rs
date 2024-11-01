@@ -7,18 +7,23 @@ use ratatui::{
     crossterm::event::{self, Event, KeyCode, KeyEventKind},
     layout::{Constraint, Layout, Position, Rect},
     style::{Color, Modifier, Style, Stylize},
+    symbols::Marker,
     text::{Line, Span, Text},
-    widgets::{Block, BorderType, Borders, List, ListItem, Paragraph},
+    widgets::{
+        canvas::{Canvas, Rectangle, Shape},
+        Block, BorderType, Borders, List, ListItem, Paragraph, Widget,
+    },
     DefaultTerminal, Frame,
 };
 
-use crate::maze::{Maze, PositionRole};
+use crate::maze::{Maze, MazeBit, PositionRole};
 
 pub struct App {
     input: String,
     cursor_position: usize,
     input_mode: InputMode,
     maze: Maze,
+    marker: Marker,
 }
 
 impl Default for App {
@@ -28,6 +33,7 @@ impl Default for App {
             input_mode: InputMode::Normal,
             cursor_position: 0,
             maze: Maze::default(),
+            marker: Marker::default(),
         }
     }
 }
@@ -35,7 +41,8 @@ impl Default for App {
 impl App {
     pub fn new() -> Self {
         Self {
-            maze: Maze::get_from_file(String::from("./Labirintos/100x100/exemplo_labirinto.txt")),
+            maze: Maze::get_from_file(String::from("./Labirintos/50x50/exemplo_labirinto.txt")),
+            marker: Marker::HalfBlock,
             ..App::default()
         }
     }
@@ -128,34 +135,22 @@ impl App {
         }
     }
 
-    fn calculate_layout(area: Rect, division_size: usize) -> (Rect, Rect, Vec<Vec<Rect>>) {
+    fn calculate_layout(area: Rect, division_size: usize) -> (Rect, Rect, Rect) {
         let main_layout = Layout::vertical([
             Constraint::Length(1),
             Constraint::Length(3),
-            Constraint::Min(0),
+            Constraint::Min(1),
         ]);
-        let block_layout = Layout::vertical(vec![Constraint::Max(4); division_size]);
-        let [help_area, input_area, main_area] = main_layout.areas(area);
-        let main_areas = block_layout
-            .split(main_area)
-            .iter()
-            .map(|&area| {
-                Layout::horizontal(vec![
-                    Constraint::Percentage(100 / division_size as u16);
-                    division_size
-                ])
-                .split(area)
-                .to_vec()
-            })
-            .collect();
-        (help_area, input_area, main_areas)
+        let [input_label_area, input_area, maze_area] = main_layout.areas(area);
+
+        (input_label_area, input_area, maze_area)
     }
 
     fn draw(&self, frame: &mut Frame) {
-        let (help_area, input_area, main_areas) =
+        let (input_label_area, input_area, maze_area) =
             App::calculate_layout(frame.area(), self.maze.size);
 
-        let (msg, style) = match self.input_mode {
+        let (label, label_style) = match self.input_mode {
             InputMode::Normal => (
                 vec![
                     "Press ".into(),
@@ -178,10 +173,10 @@ impl App {
             ),
         };
 
-        let text = Text::from(Line::from(msg)).patch_style(style);
+        let text = Text::from(Line::from(label)).patch_style(label_style);
         let help_message = Paragraph::new(text);
 
-        frame.render_widget(help_message, help_area);
+        frame.render_widget(help_message, input_label_area);
 
         let input = Paragraph::new(self.input.as_str())
             .style(match self.input_mode {
@@ -210,23 +205,22 @@ impl App {
 
         let maze = self.maze.clone();
 
-        // for i in 0..main_areas.len() {
-        //     for j in 0..main_areas[i].len() {
-        //         let area = main_areas[i][j];
-        //         let background_color = maze.map[i][j].clone().into();
-
-        //         App::render_block(frame, area, background_color);
-        //     }
-        // }
+        frame.render_widget(self.render_maze(), maze_area);
     }
 
-    fn render_block(frame: &mut Frame, area: Rect, background_color: Color) {
-        let block = Block::new()
-            .border_style(Style::default().fg(Color::Magenta))
-            .borders(Borders::NONE)
-            .border_type(BorderType::Rounded)
-            .bg(background_color);
-
-        frame.render_widget(block, area);
+    fn render_maze(&self) -> impl Widget + '_ {
+        Canvas::default()
+            .block(Block::bordered().title("Maze"))
+            .marker(self.marker)
+            .paint(|ctx| {
+                ctx.draw(&MazeBit {
+                    x: 10.0,
+                    y: 10.0,
+                    width: 100.0,
+                    height: 87.0,
+                });
+            })
+            .x_bounds([10.0, 210.0])
+            .y_bounds([10.0, 110.0])
     }
 }

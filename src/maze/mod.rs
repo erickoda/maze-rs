@@ -1,14 +1,40 @@
 mod file;
 
+use std::os::linux;
+
+use color_eyre::owo_colors::OwoColorize;
 use crossterm::cursor::position;
 use file::{MazeFileReader, MazeString};
 use rand::prelude::*;
-use ratatui::style::Color;
+use ratatui::{
+    style::Color,
+    widgets::canvas::{Line, Shape},
+};
+
+#[derive(Debug, Clone)]
+pub struct MazeBit {
+    pub x: f64,
+    pub y: f64,
+    pub height: f64,
+    pub width: f64,
+}
+
+impl Default for MazeBit {
+    fn default() -> Self {
+        Self {
+            x: f64::default(),
+            y: f64::default(),
+            height: f64::default(),
+            width: f64::default(),
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct Maze {
     pub size: usize,
     pub map: Vec<Vec<PositionRole>>,
+    pub bit: MazeBit,
 }
 
 #[derive(Clone, Debug)]
@@ -57,6 +83,7 @@ impl From<char> for PositionRole {
 pub struct MazeBuilder {
     size: Option<usize>,
     map: Option<Vec<Vec<PositionRole>>>,
+    bit: Option<MazeBit>,
 }
 
 impl Default for MazeBuilder {
@@ -64,6 +91,30 @@ impl Default for MazeBuilder {
         Self {
             size: None,
             map: None,
+            bit: None,
+        }
+    }
+}
+
+impl Shape for MazeBit {
+    fn draw(&self, painter: &mut ratatui::widgets::canvas::Painter) {
+        let mut lines: Vec<Line> = Vec::new();
+
+        let mut y = self.y;
+        while y < self.y + self.height {
+            lines.push(Line {
+                x1: self.x,
+                x2: self.x + self.width,
+                y1: y,
+                y2: y,
+                color: Color::White,
+            });
+
+            y += 0.1;
+        }
+
+        for line in &lines {
+            line.draw(painter);
         }
     }
 }
@@ -81,11 +132,16 @@ impl MazeBuilder {
         self.map = Some(map);
     }
 
+    pub fn set_bit(&mut self, bit: MazeBit) {
+        self.bit = Some(bit);
+    }
+
     pub fn build(self) -> Maze {
         let size = self.size.unwrap_or_default();
         let map = self.map.unwrap_or_default();
+        let bit = self.bit.unwrap_or_default();
 
-        Maze { size, map }
+        Maze { size, map, bit }
     }
 }
 
@@ -94,6 +150,7 @@ impl Default for Maze {
         Self {
             size: usize::default(),
             map: Vec::default(),
+            bit: MazeBit::default(),
         }
     }
 }
@@ -144,6 +201,7 @@ impl Maze {
         Maze {
             size: map.len(),
             map,
+            bit: MazeBit::default(),
         }
     }
 }
