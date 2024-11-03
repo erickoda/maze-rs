@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 
-use super::PositionRole;
+use super::square_role::MazeSquareRole;
 
 pub struct MazeFileReader;
 
@@ -28,7 +28,7 @@ impl MazeFileReader {
     }
 }
 
-impl From<MazeString> for Vec<Vec<PositionRole>> {
+impl From<MazeString> for Vec<Vec<MazeSquareRole>> {
     fn from(maze_string: MazeString) -> Self {
         let mut map = Vec::new();
 
@@ -36,7 +36,7 @@ impl From<MazeString> for Vec<Vec<PositionRole>> {
             let mut row = Vec::new();
 
             for position in line.chars() {
-                row.push(PositionRole::from(position));
+                row.push(MazeSquareRole::from(position));
             }
 
             map.push(row);
