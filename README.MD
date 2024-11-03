@@ -5,7 +5,7 @@
 - [x] Read Maze From Txt
 - [x] Print Maze on Screen
 - [ ] Optimize Print
-- [ ] Uninformed Search Algorithm
-- [ ] Informed Search Algorithm
-- [ ] User 
+- [x] Uninformed Search Algorithm
+- [x] Informed Search Algorithm
+- [ ] User Interface
 - [ ] Create Random Mazes (Optional)
