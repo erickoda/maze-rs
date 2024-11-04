@@ -12,7 +12,7 @@ pub fn find_maze_exit(maze: Vec<Vec<MazeSquareRole>>) -> Position {
         }
     }
 
-    panic!("Maze entry not found");
+    panic!("Maze exit not found");
 }
 
 pub fn find_maze_entry(maze: Vec<Vec<MazeSquareRole>>) -> Position {

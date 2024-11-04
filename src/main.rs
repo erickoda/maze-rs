@@ -22,7 +22,7 @@ fn load_maze(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    let mut maze = Maze::get_from_file("Labirintos/100x100/exemplo_labirinto.txt".into());
+    let mut maze = Maze::get_from_file("Labirintos/50x50/exemplo_labirinto.txt".into());
     let a_star_path = search::depth_first::depth_first_search(maze.clone().map);
 
     if a_star_path.is_none() {
