@@ -22,116 +22,51 @@ fn load_maze(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    let mut maze = Maze::get_from_file("Labirintos/50x50/exemplo_labirinto.txt".into());
-    let a_star_path = search::depth_first::depth_first_search(maze.clone().map);
+    let mut maze = Maze::get_from_file("Labirintos/200x200/exemplo_labirinto.txt".into());
+    let a_star_path = search::a_star::a_star(maze.clone().map);
 
-    if a_star_path.is_none() {
-        return;
-    }
+    if let Some(path) = a_star_path {
+        // Predefine mesh and materials
+        let square_mesh = meshes.add(Rectangle::default());
+        let material_empty = materials.add(Color::from(WHITE));
+        let material_wall = materials.add(Color::from(BLACK));
+        let material_entry = materials.add(Color::from(BLUE));
+        let material_exit = materials.add(Color::from(RED));
+        let material_path = materials.add(Color::from(PURPLE));
 
-    let depth_first_path = a_star_path.unwrap();
+        let scale = 50.0 / maze.size as f32 + 3.0;
 
-    for i in 0..maze.clone().map.len() {
-        for j in 0..maze.clone().map[i].len() {
-            for position in depth_first_path.iter() {
-                if i == position.x && j == position.y {
-                    maze.map[i][j] = MazeSquareRole::PathToExit;
+        for i in 0..maze.clone().map.len() {
+            for j in 0..maze.clone().map[i].len() {
+                for position in path.iter() {
+                    if i == position.x && j == position.y {
+                        maze.map[i][j] = MazeSquareRole::PathToExit;
+                    }
                 }
             }
         }
-    }
 
-    for i in 0..maze.clone().map.len() {
-        for j in 0..maze.clone().map[i].len() {
-            let scale = 50. / maze.size as f32 + 3.;
-            let position = Vec3::new(i as f32 * scale, j as f32 * scale, 1.);
+        for (i, row) in maze.map.iter().enumerate() {
+            for (j, square_role) in row.clone().iter().enumerate() {
+                let position = Vec3::new(i as f32 * scale, j as f32 * scale, 1.0);
+                let material = match square_role {
+                    MazeSquareRole::Empty => material_empty.clone(),
+                    MazeSquareRole::Wall => material_wall.clone(),
+                    MazeSquareRole::Entry => material_entry.clone(),
+                    MazeSquareRole::Exit => material_exit.clone(),
+                    MazeSquareRole::PathToExit => material_path.clone(),
+                };
 
-            match maze.clone().map[i][j] {
-                MazeSquareRole::Empty => {
-                    commands.spawn((
-                        MaterialMesh2dBundle {
-                            mesh: meshes.add(Rectangle::default()).into(),
-                            material: materials.add(Color::from(WHITE)),
-                            transform: {
-                                Transform {
-                                    translation: position,
-                                    rotation: Quat::IDENTITY,
-                                    scale: Vec3::splat(scale),
-                                }
-                            },
-                            ..Default::default()
-                        },
-                        MazeSquare,
-                    ));
-                }
-                MazeSquareRole::Wall => {
-                    commands.spawn((
-                        MaterialMesh2dBundle {
-                            mesh: meshes.add(Rectangle::default()).into(),
-                            material: materials.add(Color::from(BLACK)),
-                            transform: {
-                                Transform {
-                                    translation: position,
-                                    rotation: Quat::IDENTITY,
-                                    scale: Vec3::splat(scale),
-                                }
-                            },
-                            ..Default::default()
-                        },
-                        MazeSquare,
-                    ));
-                }
-                MazeSquareRole::Entry => {
-                    commands.spawn((
-                        MaterialMesh2dBundle {
-                            mesh: meshes.add(Rectangle::default()).into(),
-                            material: materials.add(Color::from(BLUE)),
-                            transform: {
-                                Transform {
-                                    translation: position,
-                                    rotation: Quat::IDENTITY,
-                                    scale: Vec3::splat(scale),
-                                }
-                            },
-                            ..Default::default()
-                        },
-                        MazeSquare,
-                    ));
-                }
-                MazeSquareRole::Exit => {
-                    commands.spawn((
-                        MaterialMesh2dBundle {
-                            mesh: meshes.add(Rectangle::default()).into(),
-                            material: materials.add(Color::from(RED)),
-                            transform: {
-                                Transform {
-                                    translation: position,
-                                    rotation: Quat::IDENTITY,
-                                    scale: Vec3::splat(scale),
-                                }
-                            },
-                            ..Default::default()
-                        },
-                        MazeSquare,
-                    ));
-                }
-                MazeSquareRole::PathToExit => {
-                    commands.spawn((
-                        MaterialMesh2dBundle {
-                            mesh: meshes.add(Rectangle::default()).into(),
-                            material: materials.add(Color::from(PURPLE)),
-                            transform: {
-                                Transform {
-                                    translation: position,
-                                    rotation: Quat::IDENTITY,
-                                    scale: Vec3::splat(scale),
-                                }
-                            },
-                            ..Default::default()
-                        },
-                        MazeSquare,
-                    ));
-                }
+                commands.spawn((
+                    MaterialMesh2dBundle {
+                        mesh: square_mesh.clone().into(),
+                        material,
+                        transform: Transform::from_translation(position)
+                            .with_scale(Vec3::splat(scale)),
+                        ..Default::default()
+                    },
+                    MazeSquare,
+                ));
             }
         }
     }
