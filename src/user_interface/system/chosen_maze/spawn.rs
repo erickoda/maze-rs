@@ -1,8 +1,5 @@
 use bevy::{
-    color::palettes::{
-        css::{BLACK, BLUE, LIGHT_GRAY, RED, WHITE},
-        tailwind::GREEN_400,
-    },
+    color::palettes::css::{BLACK, RED},
     prelude::*,
     sprite::MaterialMesh2dBundle,
 };
@@ -11,10 +8,7 @@ use crate::{
     components::MazeSquare,
     maze::{table_square::MazeTableSquare, MazeTable},
     search,
-    user_interface::theme::{
-        COMPLEMENTARY_100, COMPLEMENTARY_200, COMPLEMENTARY_300, NEUTRAL_0, PRIMARY_100,
-        PRIMARY_200, PRIMARY_300,
-    },
+    user_interface::theme::{COMPLEMENTARY_200, NEUTRAL_0, PRIMARY_200},
 };
 
 pub fn spawn_chosen_maze(
