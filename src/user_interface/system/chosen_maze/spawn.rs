@@ -1,6 +1,6 @@
 use bevy::{
     color::palettes::{
-        css::{BLACK, BLUE, RED, WHITE},
+        css::{BLACK, BLUE, LIGHT_GRAY, RED, WHITE},
         tailwind::GREEN_400,
     },
     prelude::*,
@@ -11,6 +11,10 @@ use crate::{
     components::MazeSquare,
     maze::{table_square::MazeTableSquare, MazeTable},
     search,
+    user_interface::theme::{
+        COMPLEMENTARY_100, COMPLEMENTARY_200, COMPLEMENTARY_300, NEUTRAL_0, PRIMARY_100,
+        PRIMARY_200, PRIMARY_300,
+    },
 };
 
 pub fn spawn_chosen_maze(
@@ -28,11 +32,11 @@ pub fn spawn_chosen_maze(
 
     if let Some(path) = a_star_path {
         let square_mesh = meshes.add(Rectangle::default());
-        let material_empty = materials.add(Color::from(WHITE));
+        let material_empty = materials.add(Color::from(PRIMARY_200));
         let material_wall = materials.add(Color::from(BLACK));
-        let material_entry = materials.add(Color::from(BLUE));
+        let material_entry = materials.add(Color::from(NEUTRAL_0));
         let material_exit = materials.add(Color::from(RED));
-        let material_path = materials.add(Color::from(GREEN_400));
+        let material_path = materials.add(Color::from(COMPLEMENTARY_200));
 
         let scale = window_width / maze_table.0.len() as f32;
         let width = scale * maze_table.0.len() as f32;
@@ -41,7 +45,10 @@ pub fn spawn_chosen_maze(
         for i in 0..maze_table.0.len() {
             for j in 0..maze_table.0[i].len() {
                 for position in path.iter() {
-                    if i == position.x && j == position.y {
+                    if i == position.x
+                        && j == position.y
+                        && maze_table.0[i][j] == MazeTableSquare::Empty
+                    {
                         maze_table.0[i][j] = MazeTableSquare::PathToExit;
                     }
                 }
