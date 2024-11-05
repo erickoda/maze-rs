@@ -8,4 +8,5 @@
 - [x] Uninformed Search Algorithm
 - [x] Informed Search Algorithm
 - [ ] User Interface
+- [ ] Animate Maze's Path Finding 
 - [ ] Create Random Mazes (Optional)

@@ -1,17 +1,12 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 
-use super::square_role::MazeSquareRole;
+use super::table_square::MazeTableSquare;
 
 pub struct MazeFileReader;
 
+#[derive(Default)]
 pub struct MazeString(pub Vec<String>);
-
-impl Default for MazeString {
-    fn default() -> Self {
-        Self(Vec::new())
-    }
-}
 
 impl MazeFileReader {
     pub fn read(file_path: String) -> io::Result<MazeString> {
@@ -28,7 +23,7 @@ impl MazeFileReader {
     }
 }
 
-impl From<MazeString> for Vec<Vec<MazeSquareRole>> {
+impl From<MazeString> for Vec<Vec<MazeTableSquare>> {
     fn from(maze_string: MazeString) -> Self {
         let mut map = Vec::new();
 
@@ -36,7 +31,7 @@ impl From<MazeString> for Vec<Vec<MazeSquareRole>> {
             let mut row = Vec::new();
 
             for position in line.chars() {
-                row.push(MazeSquareRole::from(position));
+                row.push(MazeTableSquare::from(position));
             }
 
             map.push(row);

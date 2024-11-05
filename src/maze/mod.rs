@@ -1,71 +1,99 @@
-mod builder;
 mod file;
-pub mod square_role;
+pub mod table_sizes;
+pub mod table_square;
 
 use bevy::prelude::Component;
 use file::MazeFileReader;
-use square_role::MazeSquareRole;
+use table_square::MazeTableSquare;
 
-#[derive(Debug, Clone, Component)]
-pub struct Maze {
-    pub size: usize,
-    pub map: Vec<Vec<MazeSquareRole>>,
+#[derive(Debug, Clone, Component, Default)]
+pub struct MazeTable(pub Vec<Vec<MazeTableSquare>>);
+
+#[derive(PartialEq, Clone, Debug)]
+pub struct Position {
+    pub x: usize,
+    pub y: usize,
 }
 
-impl Default for Maze {
-    fn default() -> Self {
-        Self {
-            size: usize::default(),
-            map: Vec::default(),
+impl MazeTable {
+    pub fn get_from_file(file_path: String) -> MazeTable {
+        let lines = MazeFileReader::read(file_path).unwrap();
+        let table = Vec::from(lines);
+
+        MazeTable(table)
+    }
+
+    pub fn get_empty_neighborhood(&self, position: Position) -> Vec<Position> {
+        let mut empty_neighborhood = Vec::new();
+        let valid_neighbor_role = [MazeTableSquare::Empty, MazeTableSquare::Exit];
+
+        if position.x > 0 && valid_neighbor_role.contains(&self.0[position.x - 1][position.y]) {
+            let left = Position {
+                x: position.x - 1,
+                y: position.y,
+            };
+
+            empty_neighborhood.push(left);
         }
+
+        if position.x < self.0.len() - 1
+            && valid_neighbor_role.contains(&self.0[position.x + 1][position.y])
+        {
+            let right = Position {
+                x: position.x + 1,
+                y: position.y,
+            };
+            empty_neighborhood.push(right);
+        }
+
+        if position.y > 0 && valid_neighbor_role.contains(&self.0[position.x][position.y - 1]) {
+            let up = Position {
+                x: position.x,
+                y: position.y - 1,
+            };
+            empty_neighborhood.push(up);
+        }
+
+        if position.y < self.0[0].len() - 1
+            && valid_neighbor_role.contains(&self.0[position.x][position.y + 1])
+        {
+            let down = Position {
+                x: position.x,
+                y: position.y + 1,
+            };
+            empty_neighborhood.push(down);
+        }
+
+        empty_neighborhood
     }
-}
 
-impl Maze {
-    pub fn set_size(&mut self, size: usize) {
-        self.size = size;
-    }
-
-    pub fn generate(&mut self) {
-        let size = self.size;
-
-        let mut map = vec![vec![MazeSquareRole::Empty; size]; size];
-
-        for row in map.iter_mut() {
-            for position in row.iter_mut() {
-                *position = MazeSquareRole::generate_random();
+    pub fn get_exit(&self) -> Option<Position> {
+        for (row_index, row) in self.0.iter().enumerate() {
+            for (column_index, square) in row.iter().enumerate() {
+                if *square == MazeTableSquare::Exit {
+                    return Some(Position {
+                        x: row_index,
+                        y: column_index,
+                    });
+                }
             }
         }
 
-        if !self.verify_map() {
-            return self.generate();
+        None
+    }
+
+    pub fn get_entry(&self) -> Option<Position> {
+        for (row_index, row) in self.0.iter().enumerate() {
+            for (column_index, square) in row.iter().enumerate() {
+                if *square == MazeTableSquare::Entry {
+                    return Some(Position {
+                        x: row_index,
+                        y: column_index,
+                    });
+                }
+            }
         }
 
-        let entry = self.generate_random_position();
-        let exit = self.generate_random_position();
-
-        map[0][entry] = MazeSquareRole::Entry;
-        map[size - 1][exit] = MazeSquareRole::Exit;
-
-        self.map = map;
-    }
-
-    fn generate_random_position(&self) -> usize {
-        let random_position = rand::random::<usize>() % self.size;
-        random_position
-    }
-
-    fn verify_map(&self) -> bool {
-        true
-    }
-
-    pub fn get_from_file(file_path: String) -> Maze {
-        let lines = MazeFileReader::read(file_path).unwrap();
-        let map = Vec::from(lines);
-
-        Maze {
-            size: map.len(),
-            map,
-        }
+        None
     }
 }

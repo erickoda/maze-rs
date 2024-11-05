@@ -1,14 +1,26 @@
-use crate::maze::square_role::MazeSquareRole;
+use crate::maze::{MazeTable, Position};
 
-use super::utils::{find_maze_entry, find_maze_exit, get_empty_neighborhood, Position};
-
-pub fn depth_first_search(maze: Vec<Vec<MazeSquareRole>>) -> Option<Vec<Position>> {
+pub fn depth_first_search(maze_table: MazeTable) -> Option<Vec<Position>> {
     let mut found_path_to_exit_maze: Option<Vec<Position>> = None;
     let mut visited_paths_stack: Vec<Vec<Position>> = Vec::new();
 
-    let exit = find_maze_exit(maze.clone());
-    let entry = vec![find_maze_entry(maze.clone())];
-    visited_paths_stack.push(entry.clone());
+    let exit = maze_table.get_exit();
+    let entry = maze_table.get_entry();
+
+    if exit.is_none() {
+        println!("The maze should have an Exit");
+        return None;
+    }
+
+    if entry.is_none() {
+        println!("The maze should have an Entry");
+        return None;
+    }
+
+    let exit = exit.unwrap();
+    let entry = entry.unwrap();
+
+    visited_paths_stack.push(vec![entry.clone()]);
 
     loop {
         // Verify if there are nodes that weren't visited
@@ -23,7 +35,7 @@ pub fn depth_first_search(maze: Vec<Vec<MazeSquareRole>>) -> Option<Vec<Position
         let last_visited_position = &last_visited_path[0];
 
         // Get the neighborhood of the chosen position
-        let neighborhood = get_empty_neighborhood(maze.clone(), last_visited_position.clone());
+        let neighborhood = maze_table.get_empty_neighborhood(last_visited_position.clone());
 
         // Filter the neighborhood to find if some was already visit
         let not_visited_neighborhood = neighborhood

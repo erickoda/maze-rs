@@ -1,13 +1,19 @@
-use crate::maze::square_role::MazeSquareRole;
+use crate::maze::{MazeTable, Position};
 
-use super::utils::{find_maze_entry, find_maze_exit, get_empty_neighborhood, Position};
-
-pub fn a_star(maze: Vec<Vec<MazeSquareRole>>) -> Option<Vec<Position>> {
+pub fn a_star(maze_table: MazeTable) -> Option<Vec<Position>> {
     let mut found_path_to_exit_maze: Option<Vec<Position>> = None;
     let mut visited_paths_queue: Vec<Path> = Vec::new();
 
-    let exit = find_maze_exit(maze.clone());
-    let entry = find_maze_entry(maze.clone());
+    let exit = maze_table.get_exit();
+    let entry = maze_table.get_entry();
+
+    if exit.is_none() || entry.is_none() {
+        return None;
+    }
+
+    let exit = exit.unwrap();
+    let entry = entry.unwrap();
+
     visited_paths_queue.push(Path {
         positions: vec![entry.clone()],
         g: 0.0,
@@ -15,7 +21,7 @@ pub fn a_star(maze: Vec<Vec<MazeSquareRole>>) -> Option<Vec<Position>> {
     });
 
     loop {
-        // Remove and Get the top of the stack
+        // Remove and Get the first element of the queue
         let actual_best_path = visited_paths_queue.pop();
 
         // Verify if actual best path exists
@@ -35,7 +41,7 @@ pub fn a_star(maze: Vec<Vec<MazeSquareRole>>) -> Option<Vec<Position>> {
         }
 
         // Get neighborhood
-        let neighborhood = get_empty_neighborhood(maze.clone(), last_position);
+        let neighborhood = maze_table.get_empty_neighborhood(last_position);
 
         // Get neighborhood that wasn't visit in current path
         let not_visited_neighborhood = neighborhood
