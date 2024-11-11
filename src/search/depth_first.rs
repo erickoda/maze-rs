@@ -1,20 +1,17 @@
-use std::collections::VecDeque;
-
-use bevy::{
-    color::palettes::css::{BLUE, RED},
-    prelude::*,
-};
+use bevy::{color::palettes::css::BLUE, prelude::*};
 
 use crate::maze::{MazeTable, Position};
 
-use super::systems::{send_maze_table_background_task, MazeTableTasks, MazeTableTasksController};
+use super::systems::{
+    recolor::Path, send_maze_table_background_task, MazeTableTasks, MazeTableTasksController,
+};
 
 pub fn depth_first_search(
     maze_table: MazeTable,
     maze_tasks_channel: &Res<MazeTableTasksController>,
-) -> Option<Vec<Position>> {
-    let mut found_path_to_exit_maze: Option<Vec<Position>> = None;
-    let mut visited_paths_stack: Vec<Vec<Position>> = Vec::new();
+) -> Option<Path> {
+    let mut found_path_to_exit_maze: Option<Path> = None;
+    let mut visited_paths_stack: Vec<Path> = Vec::new();
 
     let exit = maze_table.get_exit();
     let entry = maze_table.get_entry();
@@ -49,11 +46,11 @@ pub fn depth_first_search(
         // Color the already searched path
         send_maze_table_background_task(
             maze_tasks_channel,
-            MazeTableTasks::Update((last_visited_path.clone().into(), BLUE.into())),
+            MazeTableTasks::Update((last_visited_path.clone(), BLUE.into())),
         );
 
         // Get the neighborhood of the chosen position
-        let neighborhood = maze_table.get_empty_neighborhood(last_visited_position.clone());
+        let neighborhood = maze_table.get_empty_neighborhood(&last_visited_position);
 
         // Filter the neighborhood to find if some was already visit
         let not_visited_neighborhood = neighborhood

@@ -6,6 +6,8 @@ use bevy::prelude::Component;
 use file::MazeFileReader;
 use table_square::MazeTableSquare;
 
+use crate::search::systems::recolor::Path;
+
 #[derive(Debug, Clone, Component, Default)]
 pub struct MazeTable(pub Vec<Vec<MazeTableSquare>>);
 
@@ -26,7 +28,7 @@ impl MazeTable {
         MazeTable(table)
     }
 
-    pub fn get_empty_neighborhood(&self, position: Position) -> Vec<Position> {
+    pub fn get_empty_neighborhood(&self, position: &Position) -> Path {
         let mut empty_neighborhood = Vec::new();
         let valid_neighbor_role = [MazeTableSquare::Empty, MazeTableSquare::Exit];
 

@@ -1,27 +1,25 @@
-use std::{collections::VecDeque, time::Duration};
+use std::time::Duration;
 
 use bevy::{
-    color::{
-        self,
-        palettes::css::{BLUE, RED},
-    },
+    color::palettes::css::{BLUE, RED},
     prelude::*,
 };
 
 use crate::maze::{MazeSquare, Position};
 
-pub type PathWithColor = (VecDeque<Position>, Color);
+pub type PathWithColor = (Path, Color);
+pub type Path = Vec<Position>;
 
 #[derive(Resource)]
 pub struct PendingColorUpdates {
-    pub updates: VecDeque<PathWithColor>,
+    pub updates: Vec<PathWithColor>,
     pub timer: Timer,
 }
 
 pub fn spawn_pending_color_updates(mut commands: Commands) {
     commands.insert_resource(PendingColorUpdates {
-        updates: VecDeque::new(),
-        timer: Timer::from_seconds(0.1, TimerMode::Repeating),
+        updates: Vec::new(),
+        timer: Timer::from_seconds(0.01, TimerMode::Repeating),
     });
 }
 
@@ -31,29 +29,29 @@ pub fn process_pending_recolor_updates(
     mut table_query: Query<(&Position, &mut Handle<ColorMaterial>), With<MazeSquare>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    pending_updates.timer.tick(Duration::from_millis(100));
+    pending_updates.timer.tick(Duration::from_millis(10));
 
-    if pending_updates.timer.finished() {
-        if let Some(path_with_color) = pending_updates.updates.pop_front() {
-            // for (color, position) in path {
-            // println!("Processing color update for position: {:?}", position);
-            recolor_table_squares(
-                &mut table_query,
-                &mut materials,
-                path_with_color.0,
-                path_with_color.1,
-            );
-            // }
-        } else {
-            println!("No pending updates to process.");
-        }
+    if pending_updates.updates.is_empty() {
+        return;
     }
+
+    if !pending_updates.timer.finished() {
+        return;
+    }
+
+    let path_with_color = pending_updates.updates.remove(0);
+    recolor_table_squares(
+        &mut table_query,
+        &mut materials,
+        path_with_color.0,
+        path_with_color.1,
+    );
 }
 
 fn recolor_table_squares(
     table_query: &mut Query<(&Position, &mut Handle<ColorMaterial>), With<MazeSquare>>,
     materials: &mut ResMut<Assets<ColorMaterial>>,
-    path: VecDeque<Position>,
+    path: Path,
     new_color: Color,
 ) {
     let red_material = materials.add(Color::from(RED));

@@ -1,20 +1,17 @@
-use std::collections::VecDeque;
-
-use bevy::{
-    color::palettes::css::{BLUE, RED},
-    prelude::*,
-};
+use bevy::{color::palettes::css::BLUE, prelude::*};
 
 use crate::maze::{MazeTable, Position};
 
-use super::systems::{send_maze_table_background_task, MazeTableTasks, MazeTableTasksController};
+use super::systems::{
+    recolor::Path, send_maze_table_background_task, MazeTableTasks, MazeTableTasksController,
+};
 
 pub fn a_star(
     maze_table: MazeTable,
     maze_tasks_channel: &Res<MazeTableTasksController>,
-) -> Option<Vec<Position>> {
-    let mut found_path_to_exit_maze: Option<Vec<Position>> = None;
-    let mut visited_paths_queue: Vec<Path> = Vec::new();
+) -> Option<Path> {
+    let mut found_path_to_exit_maze: Option<Path> = None;
+    let mut visited_paths_queue: Vec<PathWithCost> = Vec::new();
 
     let exit = maze_table.get_exit();
     let entry = maze_table.get_entry();
@@ -26,10 +23,10 @@ pub fn a_star(
     let exit = exit.unwrap();
     let entry = entry.unwrap();
 
-    visited_paths_queue.push(Path {
+    visited_paths_queue.push(PathWithCost {
         positions: vec![entry.clone()],
         g: 0.0,
-        h: heuristic_cost(entry.clone(), exit.clone()),
+        h: heuristic_cost(&entry, &exit),
     });
 
     loop {
@@ -55,18 +52,11 @@ pub fn a_star(
         // Color the current path
         send_maze_table_background_task(
             maze_tasks_channel,
-            MazeTableTasks::Update((
-                actual_best_path
-                    .positions
-                    .iter()
-                    .map(|position| position.clone())
-                    .collect(),
-                BLUE.into(),
-            )),
+            MazeTableTasks::Update((actual_best_path.positions.clone(), BLUE.into())),
         );
 
         // Get neighborhood
-        let neighborhood = maze_table.get_empty_neighborhood(last_position);
+        let neighborhood = maze_table.get_empty_neighborhood(&last_position);
 
         // Get neighborhood that wasn't visit in current path
         let not_visited_neighborhood = neighborhood
@@ -86,10 +76,10 @@ pub fn a_star(
 
             current_best_positions.insert(0, neighbor.clone());
 
-            let new_path = Path {
+            let new_path = PathWithCost {
                 positions: current_best_positions,
                 g: current_best_path_clone.g + 1.,
-                h: heuristic_cost(neighbor.clone(), exit.clone()),
+                h: heuristic_cost(&neighbor, &exit),
             };
 
             visited_paths_queue.push(new_path);
@@ -103,7 +93,7 @@ pub fn a_star(
 }
 
 // Calculate the manhattan distance between the current position and the exit
-fn heuristic_cost(position: Position, exit: Position) -> f32 {
+fn heuristic_cost(position: &Position, exit: &Position) -> f32 {
     let x = (position.x as f32 - exit.x as f32).abs();
     let y = (position.y as f32 - exit.y as f32).abs();
 
@@ -111,13 +101,13 @@ fn heuristic_cost(position: Position, exit: Position) -> f32 {
 }
 
 #[derive(Clone, Debug)]
-struct Path {
-    positions: Vec<Position>, // path positions
-    g: f32,                   // cost to reach this path
-    h: f32,                   // heuristic cost to exit
+struct PathWithCost {
+    positions: Path, // path positions
+    g: f32,          // cost to reach this path
+    h: f32,          // heuristic cost to exit
 }
 
-impl Path {
+impl PathWithCost {
     // Calculates the cost into current path
     fn cost(&self) -> f32 {
         self.g + self.h

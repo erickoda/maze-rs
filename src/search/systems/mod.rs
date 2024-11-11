@@ -62,7 +62,7 @@ pub fn execute_maze_table_tasks(
             }
             MazeTableTasks::Update(path_with_color) => {
                 // println!("Received update: {:?} at {:?}", color, position);
-                pending_updates.updates.push_back(path_with_color);
+                pending_updates.updates.push(path_with_color);
             }
             MazeTableTasks::Destroy() => {
                 println!("Destroying the task");
