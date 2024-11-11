@@ -1,4 +1,9 @@
-use bevy::{color::palettes::css::RED, prelude::*};
+use std::collections::VecDeque;
+
+use bevy::{
+    color::palettes::css::{BLUE, RED},
+    prelude::*,
+};
 
 use crate::maze::{MazeTable, Position};
 
@@ -47,10 +52,17 @@ pub fn a_star(
             break;
         }
 
-        // Color the already searched path
+        // Color the current path
         send_maze_table_background_task(
             maze_tasks_channel,
-            MazeTableTasks::Update(RED.into(), last_position.clone()),
+            MazeTableTasks::Update((
+                actual_best_path
+                    .positions
+                    .iter()
+                    .map(|position| position.clone())
+                    .collect(),
+                BLUE.into(),
+            )),
         );
 
         // Get neighborhood
