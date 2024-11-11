@@ -1,4 +1,6 @@
 #![allow(dead_code)]
+pub mod maze_colors;
+
 use bevy::color::Color;
 
 pub const NEUTRAL_0: Color =
