@@ -83,8 +83,8 @@ pub fn a_star(
             visited_paths_queue.push(new_path);
         }
 
-        // Sort the queue by cost in ascending order
-        visited_paths_queue.sort_by(|a, b| a.cost().partial_cmp(&b.cost()).unwrap());
+        // Sort the queue by cost in descending order
+        visited_paths_queue.sort_by(|a, b| b.cost().partial_cmp(&a.cost()).unwrap());
     }
 
     found_path_to_exit_maze
