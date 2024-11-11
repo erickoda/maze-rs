@@ -7,7 +7,10 @@ use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
 use camera::{move_camera, spawn_camera};
 use search::systems::animations::{animate_a_star_path, animate_depth_first_path};
-use search::systems::recolor::{process_pending_recolor_updates, spawn_pending_color_updates};
+use search::systems::recolor::{
+    process_pending_recolor_updates, recolor_all_visited_nodes_to_default,
+    spawn_pending_color_updates,
+};
 use search::systems::{execute_maze_table_tasks, spawn_maze_table_tasks_receiver};
 use user_interface::spawn_user_menu;
 use user_interface::system::chosen_maze::button::choose_maze_button_system;
@@ -33,6 +36,9 @@ fn main() {
             animate_a_star_path.run_if(input_just_pressed(KeyCode::KeyA)),
         )
         .add_systems(FixedUpdate, execute_maze_table_tasks)
-        .add_systems(Update, process_pending_recolor_updates) // Adiciona o novo sistema
+        .add_systems(
+            Update,
+            process_pending_recolor_updates.after(recolor_all_visited_nodes_to_default),
+        ) // Adiciona o novo sistema
         .run();
 }
