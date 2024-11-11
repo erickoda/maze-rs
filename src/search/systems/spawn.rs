@@ -1,12 +1,8 @@
-use bevy::{
-    color::palettes::css::{BLACK, RED},
-    prelude::*,
-    sprite::MaterialMesh2dBundle,
-};
+use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 
 use crate::{
     maze::{table_square::MazeTableSquare, MazeSquare, MazeTable, Position},
-    user_interface::theme::{COMPLEMENTARY_200, NEUTRAL_0, PRIMARY_200},
+    user_interface::theme::maze_colors::{ENTRY, EXIT, PATH, VISITED, WALL},
 };
 
 pub fn spawn_chosen_maze(
@@ -23,11 +19,13 @@ pub fn spawn_chosen_maze(
     let width = scale * maze_table.0.len() as f32;
     let height = scale * maze_table.0.len() as f32;
     let square_mesh = meshes.add(Rectangle::default());
-    let material_empty = materials.add(PRIMARY_200);
-    let material_wall = materials.add(Color::from(BLACK));
-    let material_entry = materials.add(NEUTRAL_0);
-    let material_exit = materials.add(Color::from(RED));
-    let material_path = materials.add(COMPLEMENTARY_200);
+    let material_empty = materials.add(PATH);
+    let material_wall = materials.add(WALL);
+    let material_entry = materials.add(ENTRY);
+    let material_exit = materials.add(EXIT);
+    let material_path = materials.add(VISITED);
+
+    commands.insert_resource(maze_table.clone());
 
     for (i, row) in maze_table.0.iter().enumerate() {
         for (j, square_role) in row.clone().iter().enumerate() {

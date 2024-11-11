@@ -85,10 +85,8 @@ async fn table_background_tasks_receiver(
     tx_update: Sender<MazeTableTasks>,
 ) {
     while let Ok(recolor) = rx_control.recv().await {
-        println!("Net task received a message");
         match recolor {
             MazeTableTasks::Destroy() => {
-                println!("Destroying the task");
                 tx_update
                     .send(MazeTableTasks::Destroy())
                     .await

@@ -1,6 +1,9 @@
-use bevy::{color::palettes::css::BLUE, prelude::*};
+use bevy::prelude::*;
 
-use crate::maze::{MazeTable, Position};
+use crate::{
+    maze::{MazeTable, Position},
+    user_interface::theme::maze_colors::CURRENT,
+};
 
 use super::systems::{
     recolor::Path, send_maze_table_background_task, MazeTableTasks, MazeTableTasksController,
@@ -46,7 +49,7 @@ pub fn depth_first_search(
         // Color the already searched path
         send_maze_table_background_task(
             maze_tasks_channel,
-            MazeTableTasks::Update((last_visited_path.clone(), BLUE.into())),
+            MazeTableTasks::Update((last_visited_path.clone(), CURRENT)),
         );
 
         // Get the neighborhood of the chosen position

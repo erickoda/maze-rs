@@ -1,6 +1,9 @@
-use bevy::{color::palettes::css::BLUE, prelude::*};
+use bevy::prelude::*;
 
-use crate::maze::{MazeTable, Position};
+use crate::{
+    maze::{MazeTable, Position},
+    user_interface::theme::maze_colors::CURRENT,
+};
 
 use super::systems::{
     recolor::Path, send_maze_table_background_task, MazeTableTasks, MazeTableTasksController,
@@ -52,7 +55,7 @@ pub fn a_star(
         // Color the current path
         send_maze_table_background_task(
             maze_tasks_channel,
-            MazeTableTasks::Update((actual_best_path.positions.clone(), BLUE.into())),
+            MazeTableTasks::Update((actual_best_path.positions.clone(), CURRENT)),
         );
 
         // Get neighborhood

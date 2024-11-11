@@ -2,13 +2,13 @@ mod file;
 pub mod table_sizes;
 pub mod table_square;
 
-use bevy::prelude::Component;
+use bevy::prelude::{Component, Resource};
 use file::MazeFileReader;
 use table_square::MazeTableSquare;
 
 use crate::search::systems::recolor::Path;
 
-#[derive(Debug, Clone, Component, Default)]
+#[derive(Debug, Clone, Default, Resource)]
 pub struct MazeTable(pub Vec<Vec<MazeTableSquare>>);
 
 #[derive(Component)]

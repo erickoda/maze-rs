@@ -1,14 +1,11 @@
 use std::time::Duration;
 
-use bevy::{
-    color::palettes::{
-        css::{BLUE, RED},
-        tailwind::BLUE_200,
-    },
-    prelude::*,
-};
+use bevy::prelude::*;
 
-use crate::maze::{MazeSquare, Position};
+use crate::{
+    maze::{MazeSquare, Position},
+    user_interface::theme::maze_colors::{CURRENT, VISITED},
+};
 
 pub type PathWithColor = (Path, Color);
 pub type Path = Vec<Position>;
@@ -22,7 +19,7 @@ pub struct PendingColorUpdates {
 pub fn spawn_pending_color_updates(mut commands: Commands) {
     commands.insert_resource(PendingColorUpdates {
         updates: Vec::new(),
-        timer: Timer::from_seconds(0.1, TimerMode::Repeating),
+        timer: Timer::from_seconds(0.001, TimerMode::Repeating),
     });
 }
 
@@ -34,7 +31,7 @@ pub fn process_pending_recolor_updates(
     >,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    pending_updates.timer.tick(Duration::from_millis(100));
+    pending_updates.timer.tick(Duration::from_millis(1));
 
     if pending_updates.updates.is_empty() {
         return;
@@ -53,28 +50,6 @@ pub fn process_pending_recolor_updates(
     );
 }
 
-pub fn recolor_all_visited_nodes_to_default(
-    mut table_with_colors_query: Query<
-        &mut Handle<ColorMaterial>,
-        (With<MazeSquare>, With<Position>),
-    >,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
-    let default_empty_material = materials.add(Color::from(BLUE_200));
-
-    for mut material_handle in table_with_colors_query.iter_mut() {
-        if let Some(material) = materials.get_mut(&*material_handle) {
-            let is_painted =
-                material.color == Color::from(BLUE) || material.color == Color::from(RED);
-
-            if is_painted {
-                let new_material = default_empty_material.clone();
-                *material_handle = new_material;
-            }
-        }
-    }
-}
-
 fn recolor_table_path(
     table_with_color_and_position_query: &mut Query<
         (&Position, &mut Handle<ColorMaterial>),
@@ -84,13 +59,13 @@ fn recolor_table_path(
     path: Path,
     new_color: Color,
 ) {
-    let red_material = materials.add(Color::from(RED));
+    let visited_default_color = materials.add(VISITED);
     let new_color_material = materials.add(new_color);
 
     for (square_position, mut material_handle) in table_with_color_and_position_query.iter_mut() {
         if let Some(material) = materials.get_mut(&*material_handle) {
-            if material.color == Color::from(BLUE) {
-                let new_material = red_material.clone();
+            if material.color == CURRENT {
+                let new_material = visited_default_color.clone();
                 *material_handle = new_material;
             }
         }
