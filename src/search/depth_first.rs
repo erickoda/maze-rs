@@ -53,7 +53,7 @@ pub fn depth_first_search(
         );
 
         // Get the neighborhood of the chosen position
-        let neighborhood = maze_table.get_empty_neighborhood(&last_visited_position);
+        let neighborhood = maze_table.get_empty_neighborhood(last_visited_position);
 
         // Filter the neighborhood to find if some was already visit
         let not_visited_neighborhood = neighborhood

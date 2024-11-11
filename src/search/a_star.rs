@@ -82,7 +82,7 @@ pub fn a_star(
             let new_path = PathWithCost {
                 positions: current_best_positions,
                 g: current_best_path_clone.g + 1.,
-                h: heuristic_cost(&neighbor, &exit),
+                h: heuristic_cost(neighbor, &exit),
             };
 
             visited_paths_queue.push(new_path);
