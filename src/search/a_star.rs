@@ -1,6 +1,13 @@
+use bevy::{color::palettes::css::RED, prelude::*};
+
 use crate::maze::{MazeTable, Position};
 
-pub fn a_star(maze_table: MazeTable) -> Option<Vec<Position>> {
+use super::systems::{send_maze_table_background_task, MazeTableTasks, MazeTableTasksController};
+
+pub fn a_star(
+    maze_table: MazeTable,
+    maze_tasks_channel: &Res<MazeTableTasksController>,
+) -> Option<Vec<Position>> {
     let mut found_path_to_exit_maze: Option<Vec<Position>> = None;
     let mut visited_paths_queue: Vec<Path> = Vec::new();
 
@@ -40,6 +47,12 @@ pub fn a_star(maze_table: MazeTable) -> Option<Vec<Position>> {
             break;
         }
 
+        // Color the already searched path
+        send_maze_table_background_task(
+            maze_tasks_channel,
+            MazeTableTasks::Update(RED.into(), last_position.clone()),
+        );
+
         // Get neighborhood
         let neighborhood = maze_table.get_empty_neighborhood(last_position);
 
@@ -77,7 +90,7 @@ pub fn a_star(maze_table: MazeTable) -> Option<Vec<Position>> {
     found_path_to_exit_maze
 }
 
-// calculate the manhattan distance between the current position and the exit
+// Calculate the manhattan distance between the current position and the exit
 fn heuristic_cost(position: Position, exit: Position) -> f32 {
     let x = (position.x as f32 - exit.x as f32).abs();
     let y = (position.y as f32 - exit.y as f32).abs();

@@ -9,7 +9,10 @@ use table_square::MazeTableSquare;
 #[derive(Debug, Clone, Component, Default)]
 pub struct MazeTable(pub Vec<Vec<MazeTableSquare>>);
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(Component)]
+pub struct MazeSquare;
+
+#[derive(PartialEq, Clone, Debug, Component, Default)]
 pub struct Position {
     pub x: usize,
     pub y: usize,

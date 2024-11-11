@@ -1,6 +1,13 @@
+use bevy::{color::palettes::css::RED, prelude::*};
+
 use crate::maze::{MazeTable, Position};
 
-pub fn depth_first_search(maze_table: MazeTable) -> Option<Vec<Position>> {
+use super::systems::{send_maze_table_background_task, MazeTableTasks, MazeTableTasksController};
+
+pub fn depth_first_search(
+    maze_table: MazeTable,
+    maze_tasks_channel: &Res<MazeTableTasksController>,
+) -> Option<Vec<Position>> {
     let mut found_path_to_exit_maze: Option<Vec<Position>> = None;
     let mut visited_paths_stack: Vec<Vec<Position>> = Vec::new();
 
@@ -34,6 +41,12 @@ pub fn depth_first_search(maze_table: MazeTable) -> Option<Vec<Position>> {
         // Get the top element of the current path
         let last_visited_position = &last_visited_path[0];
 
+        // Color the already searched path
+        send_maze_table_background_task(
+            maze_tasks_channel,
+            MazeTableTasks::Update(RED.into(), last_visited_position.clone()),
+        );
+
         // Get the neighborhood of the chosen position
         let neighborhood = maze_table.get_empty_neighborhood(last_visited_position.clone());
 
@@ -59,6 +72,11 @@ pub fn depth_first_search(maze_table: MazeTable) -> Option<Vec<Position>> {
             }
 
             visited_paths_stack.insert(0, last_visited_path_clone);
+        }
+
+        // If the exit was found, break the loop
+        if found_path_to_exit_maze.is_some() {
+            break;
         }
     }
 
