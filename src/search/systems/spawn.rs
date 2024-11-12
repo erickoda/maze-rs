@@ -1,4 +1,4 @@
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::{prelude::*, render::view::window, sprite::MaterialMesh2dBundle};
 
 use crate::{
     maze::{table_square::MazeTableSquare, MazeSquare, MazeTable, Position},
@@ -14,8 +14,10 @@ pub fn spawn_chosen_maze(
 ) {
     let window = windows.single();
     let window_width = window.resolution.width();
+    let window_height = window.resolution.height();
+    let min_window_size = window_width.min(window_height);
 
-    let scale = window_width / (maze_table.0.len() as f32) * 0.9;
+    let scale = min_window_size / (maze_table.0.len() as f32) * 0.9;
     let width = scale * (maze_table.0.len() - 1) as f32;
     let height = scale * (maze_table.0.len() - 1) as f32;
     let square_mesh = meshes.add(Rectangle::default());
