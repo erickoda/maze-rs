@@ -26,7 +26,7 @@ The maze is a N*N matrix stored in a .txt file and each character can assume one
 - [x] Informed Search Algorithm
 - [x] User Interface
 - [x] Animate Maze's Path Finding
-- [ ] Add Faster Path Finding Animation
+- [x] Add Faster Path Finding Animation
 - [ ] Implement more search algorithms (Optional)
 - [ ] Create more generic way to store and read the mazes (Optional)
 - [ ] Create Random Mazes (Optional)
