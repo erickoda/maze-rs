@@ -21,7 +21,7 @@ pub struct PendingColorUpdates {
 pub fn spawn_pending_color_updates(mut commands: Commands) {
     commands.insert_resource(PendingColorUpdates {
         updates: VecDeque::new(),
-        timer: Timer::from_seconds(0.0001, TimerMode::Repeating),
+        timer: Timer::from_seconds(0.00001, TimerMode::Repeating),
     });
 }
 
@@ -33,27 +33,23 @@ pub fn process_pending_recolor_updates(
     >,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    pending_updates.timer.tick(Duration::from_micros(100));
-
-    if pending_updates.updates.is_empty() {
-        return;
-    }
+    pending_updates.timer.tick(Duration::from_micros(10));
 
     if !pending_updates.timer.finished() {
         return;
     }
 
-    let path_with_color = pending_updates.updates.pop_front().unwrap();
-
-    let start = Instant::now();
-    recolor_table_path(
-        &mut table_with_color_and_position_query,
-        &mut materials,
-        path_with_color.0,
-        path_with_color.1,
-    );
-    let duration = start.elapsed();
-    println!("Recolor path took: {:?}", duration);
+    if let Some(path_with_color) = pending_updates.updates.pop_front() {
+        let start = Instant::now();
+        recolor_table_path(
+            &mut table_with_color_and_position_query,
+            &mut materials,
+            path_with_color.0,
+            path_with_color.1,
+        );
+        let duration = start.elapsed();
+        println!("Recolor path took: {:?}", duration);
+    }
 }
 
 fn recolor_table_path(
