@@ -1,4 +1,6 @@
-use std::time::Duration;
+use std::collections::{HashMap, HashSet};
+use std::time::Instant;
+use std::{collections::VecDeque, time::Duration};
 
 use bevy::prelude::*;
 
@@ -8,18 +10,18 @@ use crate::{
 };
 
 pub type PathWithColor = (Path, Color);
-pub type Path = Vec<Position>;
+pub type Path = VecDeque<Position>;
 
 #[derive(Resource)]
 pub struct PendingColorUpdates {
-    pub updates: Vec<PathWithColor>,
+    pub updates: VecDeque<PathWithColor>,
     pub timer: Timer,
 }
 
 pub fn spawn_pending_color_updates(mut commands: Commands) {
     commands.insert_resource(PendingColorUpdates {
-        updates: Vec::new(),
-        timer: Timer::from_seconds(0.001, TimerMode::Repeating),
+        updates: VecDeque::new(),
+        timer: Timer::from_seconds(0.0001, TimerMode::Repeating),
     });
 }
 
@@ -31,7 +33,7 @@ pub fn process_pending_recolor_updates(
     >,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    pending_updates.timer.tick(Duration::from_millis(1));
+    pending_updates.timer.tick(Duration::from_micros(100));
 
     if pending_updates.updates.is_empty() {
         return;
@@ -41,13 +43,17 @@ pub fn process_pending_recolor_updates(
         return;
     }
 
-    let path_with_color = pending_updates.updates.remove(0);
+    let path_with_color = pending_updates.updates.pop_front().unwrap();
+
+    let start = Instant::now();
     recolor_table_path(
         &mut table_with_color_and_position_query,
         &mut materials,
         path_with_color.0,
         path_with_color.1,
     );
+    let duration = start.elapsed();
+    println!("Recolor path took: {:?}", duration);
 }
 
 fn recolor_table_path(
@@ -61,6 +67,7 @@ fn recolor_table_path(
 ) {
     let visited_default_color = materials.add(VISITED);
     let new_color_material = materials.add(new_color);
+    let path_set: HashSet<Position> = path.into_iter().collect();
 
     for (square_position, mut material_handle) in table_with_color_and_position_query.iter_mut() {
         if let Some(material) = materials.get_mut(&*material_handle) {
@@ -68,16 +75,10 @@ fn recolor_table_path(
                 let new_material = visited_default_color.clone();
                 *material_handle = new_material;
             }
-        }
 
-        for position in path.iter() {
-            if square_position == position {
-                if let Some(material) = materials.get_mut(&*material_handle) {
-                    if material.color != new_color {
-                        let new_material = new_color_material.clone();
-                        *material_handle = new_material;
-                    }
-                }
+            if path_set.contains(&square_position) {
+                let new_material = new_color_material.clone();
+                *material_handle = new_material;
             }
         }
     }

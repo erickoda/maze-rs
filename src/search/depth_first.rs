@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use bevy::prelude::*;
 
 use crate::{
@@ -32,7 +34,7 @@ pub fn depth_first_search(
     let exit = exit.unwrap();
     let entry = entry.unwrap();
 
-    visited_paths_stack.push(vec![entry.clone()]);
+    visited_paths_stack.push(VecDeque::from([entry.clone()]));
 
     loop {
         // Verify if there are nodes that weren't visited

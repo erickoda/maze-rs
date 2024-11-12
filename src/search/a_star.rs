@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use bevy::prelude::*;
 
 use crate::{
@@ -27,7 +29,7 @@ pub fn a_star(
     let entry = entry.unwrap();
 
     visited_paths_queue.push(PathWithCost {
-        positions: vec![entry.clone()],
+        positions: VecDeque::from([entry.clone()]),
         g: 0.0,
         h: heuristic_cost(&entry, &exit),
     });
