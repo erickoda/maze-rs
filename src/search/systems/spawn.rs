@@ -15,9 +15,9 @@ pub fn spawn_chosen_maze(
     let window = windows.single();
     let window_width = window.resolution.width();
 
-    let scale = window_width / maze_table.0.len() as f32;
-    let width = scale * maze_table.0.len() as f32;
-    let height = scale * maze_table.0.len() as f32;
+    let scale = window_width / (maze_table.0.len() as f32) * 0.9;
+    let width = scale * (maze_table.0.len() - 1) as f32;
+    let height = scale * (maze_table.0.len() - 1) as f32;
     let square_mesh = meshes.add(Rectangle::default());
     let material_empty = materials.add(PATH);
     let material_wall = materials.add(WALL);
