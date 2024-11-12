@@ -33,6 +33,6 @@ fn main() {
             animate_a_star_path.run_if(input_just_pressed(KeyCode::KeyA)),
         )
         .add_systems(FixedUpdate, execute_maze_table_tasks)
-        .add_systems(Update, process_pending_recolor_updates) // Adiciona o novo sistema
+        .add_systems(Update, process_pending_recolor_updates)
         .run();
 }
