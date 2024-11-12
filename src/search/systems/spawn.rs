@@ -1,8 +1,13 @@
-use bevy::{color::palettes::tailwind::RED_200, prelude::*, sprite::MaterialMesh2dBundle};
+use std::cmp::Ordering;
+
+use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 
 use crate::{
     maze::{table_square::MazeTableSquare, MazeSquare, MazeTable, Position},
-    user_interface::theme::maze_colors::{ENTRY, EXIT, PATH, VISITED, WALL},
+    user_interface::theme::{
+        maze_colors::{ENTRY, EXIT, PATH, VISITED, WALL},
+        COMPLEMENTARY_300,
+    },
 };
 
 pub fn spawn_chosen_maze(
@@ -18,7 +23,13 @@ pub fn spawn_chosen_maze(
     let window_height = window.resolution.height();
     let min_window_size = window_width.min(window_height);
 
-    let scale = min_window_size / (maze_table.0.len() as f32) * 0.85;
+    let scale = {
+        match min_window_size.partial_cmp(&window_height) {
+            Some(Ordering::Equal) => min_window_size / (maze_table.0.len() as f32) * 0.60,
+            _ => min_window_size / (maze_table.0.len() as f32) * 0.85,
+        }
+    };
+
     let width = scale * (maze_table.0.len() - 1) as f32;
     let height = scale * (maze_table.0.len() - 1) as f32;
     let square_mesh = meshes.add(Rectangle::default());
@@ -60,21 +71,24 @@ pub fn spawn_chosen_maze(
         }
     }
 
-    commands.spawn((TextBundle::from_section(
-        "Press 󰬈 to display A* algorithm\n Press 󰬋 for DFS algorithm",
-        TextStyle {
-            font: asset_server.load("fonts/JetBrainsMono/JetBrainsMonoNerdFont-Thin.ttf"),
-            font_size: 16.0,
-            color: Color::from(RED_200),
+    commands.spawn(
+        TextBundle::from_section(
+            "Press 󰬈 to display A* algorithm\nPress 󰬋 for DFS algorithm\nPress 󱊷 to open the menu\nPress 󰛀 󰛁 󰛂 󰜯 󰐖 󰍵 to movement camera
+            ",
+            TextStyle {
+                font: asset_server.load("fonts/JetBrainsMono/JetBrainsMonoNerdFont-Thin.ttf"),
+                font_size: 16.0,
+                color: Color::from(COMPLEMENTARY_300),
+                ..default()
+            },
+        )
+        .with_text_justify(JustifyText::Center)
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            bottom: Val::Px(0.),
+            right: Val::Px(0.),
+            left: Val::Px(0.),
             ..default()
-        },
-    )
-    .with_text_justify(JustifyText::Center)
-    .with_style(Style {
-        position_type: PositionType::Absolute,
-        bottom: Val::Px(5.0),
-        right: Val::Px(5.0),
-        left: Val::Px(5.0),
-        ..default()
-    }),));
+        }),
+    );
 }
