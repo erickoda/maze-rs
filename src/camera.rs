@@ -1,7 +1,12 @@
+use std::f32::consts::PI;
+
 use bevy::prelude::*;
 
 pub fn spawn_camera(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2dBundle {
+        transform: Transform::default().with_rotation(Quat::from_rotation_z(PI / 2.)),
+        ..default()
+    });
 }
 
 pub fn move_camera(
