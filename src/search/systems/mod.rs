@@ -50,6 +50,7 @@ pub fn execute_maze_table_tasks(
     mut pending_updates: ResMut<PendingColorUpdates>,
     destroy_query: Query<Entity, With<MazeSquare>>,
     mut table_with_color_and_position_query: Query<&mut Handle<ColorMaterial>, With<MazeSquare>>,
+    asset_server: Res<AssetServer>,
 ) {
     while let Ok(msg) = maze_tasks_channel.rx_update.try_recv() {
         match msg {
@@ -60,6 +61,7 @@ pub fn execute_maze_table_tasks(
                     &mut materials,
                     maze_table.clone(),
                     &mut windows,
+                    &asset_server,
                 );
             }
             MazeTableTasks::Update(path_with_color) => {

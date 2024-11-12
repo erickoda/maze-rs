@@ -1,4 +1,4 @@
-use bevy::{prelude::*, render::view::window, sprite::MaterialMesh2dBundle};
+use bevy::{color::palettes::tailwind::RED_200, prelude::*, sprite::MaterialMesh2dBundle};
 
 use crate::{
     maze::{table_square::MazeTableSquare, MazeSquare, MazeTable, Position},
@@ -11,13 +11,14 @@ pub fn spawn_chosen_maze(
     materials: &mut ResMut<Assets<ColorMaterial>>,
     maze_table: MazeTable,
     windows: &mut Query<&Window>,
+    asset_server: &Res<AssetServer>,
 ) {
     let window = windows.single();
     let window_width = window.resolution.width();
     let window_height = window.resolution.height();
     let min_window_size = window_width.min(window_height);
 
-    let scale = min_window_size / (maze_table.0.len() as f32) * 0.9;
+    let scale = min_window_size / (maze_table.0.len() as f32) * 0.85;
     let width = scale * (maze_table.0.len() - 1) as f32;
     let height = scale * (maze_table.0.len() - 1) as f32;
     let square_mesh = meshes.add(Rectangle::default());
@@ -58,4 +59,22 @@ pub fn spawn_chosen_maze(
             ));
         }
     }
+
+    commands.spawn((TextBundle::from_section(
+        "Press 󰬈 to display A* algorithm\n Press 󰬋 for DFS algorithm",
+        TextStyle {
+            font: asset_server.load("fonts/JetBrainsMono/JetBrainsMonoNerdFont-Thin.ttf"),
+            font_size: 16.0,
+            color: Color::from(RED_200),
+            ..default()
+        },
+    )
+    .with_text_justify(JustifyText::Center)
+    .with_style(Style {
+        position_type: PositionType::Absolute,
+        bottom: Val::Px(5.0),
+        right: Val::Px(5.0),
+        left: Val::Px(5.0),
+        ..default()
+    }),));
 }

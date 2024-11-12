@@ -5,7 +5,7 @@ use super::table_square::MazeTableSquare;
 
 pub struct MazeFileReader;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct MazeString(pub Vec<String>);
 
 impl MazeFileReader {
