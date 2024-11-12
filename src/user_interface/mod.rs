@@ -4,7 +4,7 @@ pub mod theme;
 
 use bevy::prelude::*;
 use components::{chosen_maze_button::spawn_choose_maze_button, text::NestedTextBuilder};
-use theme::{DARK_GREY, PRIMARY_100};
+use theme::{background_color::BACKGROUND_COLOR, PRIMARY_100};
 
 use crate::maze::table_sizes::DefaultMazeTableSizes;
 
@@ -25,7 +25,7 @@ pub fn spawn_user_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                 justify_content: JustifyContent::Center,
                 ..Default::default()
             },
-            background_color: BackgroundColor(DARK_GREY),
+            background_color: BackgroundColor(BACKGROUND_COLOR),
             ..Default::default()
         })
         .insert(MainMenu)

@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+pub mod background_color;
 pub mod maze_colors;
 
 use bevy::color::Color;
