@@ -4,6 +4,7 @@ use std::{collections::VecDeque, time::Duration};
 
 use bevy::prelude::*;
 
+use crate::user_interface::theme::maze_colors::PATH;
 use crate::{
     maze::{MazeSquare, Position},
     user_interface::theme::maze_colors::{CURRENT, VISITED},
@@ -49,6 +50,22 @@ pub fn process_pending_recolor_updates(
         );
         let duration = start.elapsed();
         println!("Recolor path took: {:?}", duration);
+    }
+}
+
+pub fn recolor_maze_paths_to_default(
+    table_with_color_and_position_query: &mut Query<&mut Handle<ColorMaterial>, With<MazeSquare>>,
+    materials: &mut ResMut<Assets<ColorMaterial>>,
+) {
+    let default_color = materials.add(PATH);
+
+    for mut material_handle in table_with_color_and_position_query.iter_mut() {
+        if let Some(material) = materials.get_mut(&*material_handle) {
+            let is_path = material.color == CURRENT || material.color == VISITED;
+            if is_path {
+                *material_handle = default_color.clone();
+            }
+        }
     }
 }
 

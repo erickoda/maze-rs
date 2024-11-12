@@ -5,7 +5,7 @@ mod spawn;
 
 use async_channel::{Receiver, Sender};
 use bevy::{prelude::*, tasks::IoTaskPool};
-use recolor::{PathWithColor, PendingColorUpdates};
+use recolor::{recolor_maze_paths_to_default, PathWithColor, PendingColorUpdates};
 use remove::remove_maze;
 use spawn::spawn_chosen_maze;
 
@@ -16,6 +16,7 @@ pub enum MazeTableTasks {
     Create(MazeTable),
     Destroy(),
     Update(PathWithColor),
+    Clear(),
 }
 
 #[derive(Resource)]
@@ -48,6 +49,7 @@ pub fn execute_maze_table_tasks(
     mut windows: Query<&Window>,
     mut pending_updates: ResMut<PendingColorUpdates>,
     destroy_query: Query<Entity, With<MazeSquare>>,
+    mut table_with_color_and_position_query: Query<&mut Handle<ColorMaterial>, With<MazeSquare>>,
 ) {
     while let Ok(msg) = maze_tasks_channel.rx_update.try_recv() {
         match msg {
@@ -66,6 +68,13 @@ pub fn execute_maze_table_tasks(
             MazeTableTasks::Destroy() => {
                 pending_updates.updates.clear();
                 remove_maze(&mut commands, &destroy_query);
+            }
+            MazeTableTasks::Clear() => {
+                pending_updates.updates.clear();
+                recolor_maze_paths_to_default(
+                    &mut table_with_color_and_position_query,
+                    &mut materials,
+                );
             }
         }
     }
@@ -101,6 +110,12 @@ async fn table_background_tasks_receiver(
             MazeTableTasks::Update(path_with_color) => {
                 tx_update
                     .send(MazeTableTasks::Update(path_with_color))
+                    .await
+                    .expect("Error sending updates over channel");
+            }
+            MazeTableTasks::Clear() => {
+                tx_update
+                    .send(MazeTableTasks::Clear())
                     .await
                     .expect("Error sending updates over channel");
             }
