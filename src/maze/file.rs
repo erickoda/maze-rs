@@ -41,12 +41,12 @@ impl From<MazeString> for Vec<Vec<MazeBoardSquare>> {
         // needs to transpose the map matrix and reverse each new line
         // because of how bevy 2D coordinates work
         for j in 0..map[0].len() {
-            for i in 0..map.len() {
+            for line in &map {
                 if j >= transpose_map.len() {
                     transpose_map.push(Vec::new());
                 }
 
-                transpose_map[j].push(map[i][j].clone());
+                transpose_map[j].push(line[j].clone());
             }
             transpose_map[j].reverse();
         }
