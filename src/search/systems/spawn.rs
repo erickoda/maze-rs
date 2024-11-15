@@ -76,8 +76,7 @@ pub fn spawn_chosen_maze(
             TextStyle {
                 font: asset_server.load("fonts/JetBrainsMono/JetBrainsMonoNerdFont-Thin.ttf"),
                 font_size: 16.0,
-                color: Color::from(COMPLEMENTARY_300),
-                ..default()
+                color: COMPLEMENTARY_300,
             },
         )
         .with_text_justify(JustifyText::Center)
