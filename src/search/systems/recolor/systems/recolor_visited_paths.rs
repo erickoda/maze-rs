@@ -21,7 +21,7 @@ pub fn recolor_board_visited_paths(
 
     for (square_position, mut material_handle) in board_with_color_and_position_query.iter_mut() {
         if let Some(material) = materials.get_mut(&*material_handle) {
-            if path_set.contains(&square_position) {
+            if path_set.contains(square_position) {
                 let new_material = new_color_material.clone();
                 *material_handle = new_material;
                 continue;
@@ -32,7 +32,7 @@ pub fn recolor_board_visited_paths(
                 *material_handle = new_material;
             }
 
-            if skipped_visited_positions.contains(&square_position) {
+            if skipped_visited_positions.contains(square_position) {
                 let new_material = visited_default_color.clone();
                 *material_handle = new_material;
             }
