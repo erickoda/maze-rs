@@ -1,33 +1,28 @@
 pub mod components;
+mod entity;
 pub mod system;
 pub mod theme;
 
+use crate::{
+    maze::table_sizes::DefaultMazeTableSizes, search::systems::recolor::RecolorSpeedChanger,
+};
 use bevy::prelude::*;
-use components::{chosen_maze_button::spawn_choose_maze_button, text::NestedTextBuilder};
-use theme::{background_color::BACKGROUND_COLOR, PRIMARY_100};
+use components::{
+    children::{
+        button::NestedButtonBuilder, flex_layout::ChildrenFlexLayout, text::NestedTextBuilder,
+    },
+    parent::flex_layout::ParentFlexLayout,
+};
+use entity::{HoverableButton, MainMenu, SpeedBar};
+use theme::{COMPLEMENTARY_100, PRIMARY_100};
 
-use crate::maze::table_sizes::DefaultMazeTableSizes;
+pub fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let font: Handle<Font> =
+        asset_server.load("fonts/JetBrainsMono/JetBrainsMonoNerdFont-Regular.ttf");
+    let bold_font: Handle<Font> =
+        asset_server.load("fonts/JetBrainsMono/JetBrainsMonoNerdFont-ExtraBold.ttf");
 
-#[derive(Component)]
-pub struct MainMenu;
-
-pub fn spawn_user_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let font: Handle<Font> = asset_server.load("fonts/Poppins/Poppins-Regular.ttf");
-    let bold_font: Handle<Font> = asset_server.load("fonts/Poppins/Poppins-Bold.ttf");
-
-    commands
-        .spawn(NodeBundle {
-            style: Style {
-                width: Val::Percent(100.),
-                height: Val::Percent(100.),
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                ..Default::default()
-            },
-            background_color: BackgroundColor(BACKGROUND_COLOR),
-            ..Default::default()
-        })
+    ParentFlexLayout::spawn_vertical(&mut commands)
         .insert(MainMenu)
         .with_children(|builder| {
             NestedTextBuilder::default()
@@ -38,37 +33,91 @@ pub fn spawn_user_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                 .spawn(builder);
         })
         .with_children(|builder| {
-            builder
-                .spawn(NodeBundle {
-                    style: Style {
-                        flex_direction: FlexDirection::Row,
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Center,
-                        ..default()
-                    },
-                    ..default()
+            ChildrenFlexLayout::spawn_horizontal(builder).with_children(|builder| {
+                NestedButtonBuilder::default()
+                    .add_font(font.clone())
+                    .add_text(DefaultMazeTableSizes::TenPerTen)
+                    .spawn(builder, (HoverableButton, DefaultMazeTableSizes::TenPerTen));
+
+                NestedButtonBuilder::default()
+                    .add_font(font.clone())
+                    .add_text(DefaultMazeTableSizes::FiftyPerFifty)
+                    .spawn(
+                        builder,
+                        (HoverableButton, DefaultMazeTableSizes::FiftyPerFifty),
+                    );
+
+                NestedButtonBuilder::default()
+                    .add_font(font.clone())
+                    .add_text(DefaultMazeTableSizes::OneHundredPerOneHundred)
+                    .spawn(
+                        builder,
+                        (
+                            HoverableButton,
+                            DefaultMazeTableSizes::OneHundredPerOneHundred,
+                        ),
+                    );
+
+                NestedButtonBuilder::default()
+                    .add_font(font.clone())
+                    .add_text(DefaultMazeTableSizes::TwoHundredPerTwoHundred)
+                    .spawn(
+                        builder,
+                        (
+                            HoverableButton,
+                            DefaultMazeTableSizes::TwoHundredPerTwoHundred,
+                        ),
+                    );
+            });
+        })
+        .with_children(|builder| {
+            ChildrenFlexLayout::spawn_vertical(builder)
+                .with_children(|builder| {
+                    ChildrenFlexLayout::spawn_horizontal(builder).with_children(|builder| {
+                        NestedButtonBuilder::default()
+                            .add_font(font.clone())
+                            .add_text("󰳡 Speed Up")
+                            .spawn(builder, (HoverableButton, RecolorSpeedChanger::Faster));
+
+                        NestedButtonBuilder::default()
+                            .add_font(font.clone())
+                            .add_text("󰳛 Speed Down")
+                            .spawn(builder, (HoverableButton, RecolorSpeedChanger::Slower));
+                    });
                 })
                 .with_children(|builder| {
-                    spawn_choose_maze_button(
-                        builder,
-                        font.clone(),
-                        DefaultMazeTableSizes::TenPerTen,
-                    );
-                    spawn_choose_maze_button(
-                        builder,
-                        font.clone(),
-                        DefaultMazeTableSizes::FiftyPerFifty,
-                    );
-                    spawn_choose_maze_button(
-                        builder,
-                        font.clone(),
-                        DefaultMazeTableSizes::OneHundredPerOneHundred,
-                    );
-                    spawn_choose_maze_button(
-                        builder,
-                        font.clone(),
-                        DefaultMazeTableSizes::TwoHundredPerTwoHundred,
-                    );
+                    builder
+                        .spawn(NodeBundle {
+                            style: Style {
+                                flex_direction: FlexDirection::Row,
+                                justify_content: JustifyContent::Start,
+                                align_items: AlignItems::Center,
+                                width: Val::Percent(100.),
+                                height: Val::Px(4.),
+                                border: UiRect::all(Val::Px(1.)),
+                                ..default()
+                            },
+                            background_color: Color::WHITE.into(),
+                            ..default()
+                        })
+                        .with_children(|builder| {
+                            builder.spawn((
+                                NodeBundle {
+                                    style: Style {
+                                        flex_direction: FlexDirection::Row,
+                                        justify_content: JustifyContent::Center,
+                                        align_items: AlignItems::Center,
+                                        width: Val::Percent(100.),
+                                        height: Val::Px(4.),
+                                        border: UiRect::all(Val::Px(0.3)),
+                                        ..default()
+                                    },
+                                    background_color: COMPLEMENTARY_100.into(),
+                                    ..default()
+                                },
+                                SpeedBar,
+                            ));
+                        });
                 });
         });
 }

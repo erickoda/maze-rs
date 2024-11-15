@@ -1,2 +1,2 @@
-pub mod chosen_maze_button;
-pub mod text;
+pub mod children;
+pub mod parent;

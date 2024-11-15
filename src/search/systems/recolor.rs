@@ -19,6 +19,60 @@ pub struct PendingColorUpdates {
     pub timer: Timer,
 }
 
+#[derive(Resource, Clone)]
+pub struct MazeAnimationSpeed(u32);
+
+impl From<MazeAnimationSpeed> for u32 {
+    fn from(value: MazeAnimationSpeed) -> Self {
+        if value.0 < MazeAnimationSpeed::get_min() {
+            return MazeAnimationSpeed::get_min();
+        }
+
+        if value.0 > MazeAnimationSpeed::get_max() {
+            return MazeAnimationSpeed::get_max();
+        }
+
+        value.0
+    }
+}
+
+impl MazeAnimationSpeed {
+    pub fn slower(&mut self) {
+        if self.0 <= MazeAnimationSpeed::get_min() {
+            return;
+        }
+
+        self.0 -= 10;
+    }
+
+    pub fn faster(&mut self) {
+
+        if self.0 >= MazeAnimationSpeed::get_max() {
+            return;
+        }
+
+        self.0 += 10;
+    }
+
+    pub fn get_max() -> u32 {
+        251
+    }
+
+    pub fn get_min() -> u32 {
+        1
+    }
+}
+
+#[derive(Component)]
+pub enum RecolorSpeedChanger {
+    Slower,
+    Faster,
+}
+
+pub fn spawn_quantity_of_skipped_path_on_recolor(mut commands: Commands) {
+    commands.insert_resource(MazeAnimationSpeed(200));
+}
+
 pub fn spawn_pending_color_updates(mut commands: Commands) {
     commands.insert_resource(PendingColorUpdates {
         updates: VecDeque::new(),
@@ -33,6 +87,7 @@ pub fn process_pending_recolor_updates(
         With<MazeSquare>,
     >,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    quantity_of_skipped_paths: Res<MazeAnimationSpeed>,
 ) {
     pending_updates.timer.tick(Duration::from_micros(10));
 
@@ -40,11 +95,10 @@ pub fn process_pending_recolor_updates(
         return;
     }
 
-    let quantity_of_skipped_paths = 80;
     let mut current_path_with_color: Option<(VecDeque<Position>, Color)> = None;
     let mut skipped_visited_positions: HashSet<Position> = HashSet::new();
 
-    for _ in 0..quantity_of_skipped_paths {
+    for _ in 0..quantity_of_skipped_paths.0 {
         if let Some(path_with_color) = pending_updates.updates.pop_front() {
             for position in &path_with_color.0 {
                 skipped_visited_positions.insert(position.clone());
@@ -68,12 +122,12 @@ pub fn process_pending_recolor_updates(
 }
 
 pub fn recolor_maze_paths_to_default(
-    table_with_color_and_position_query: &mut Query<&mut Handle<ColorMaterial>, With<MazeSquare>>,
+    table_with_color_query: &mut Query<&mut Handle<ColorMaterial>, With<MazeSquare>>,
     materials: &mut ResMut<Assets<ColorMaterial>>,
 ) {
     let default_color = materials.add(PATH);
 
-    for mut material_handle in table_with_color_and_position_query.iter_mut() {
+    for mut material_handle in table_with_color_query.iter_mut() {
         if let Some(material) = materials.get_mut(&*material_handle) {
             let is_path = material.color == CURRENT || material.color == VISITED;
             if is_path {

@@ -23,8 +23,8 @@ pub struct Position {
 }
 
 impl MazeTable {
-    pub fn get_from_file(file_path: String) -> MazeTable {
-        let lines = MazeFileReader::read(file_path).unwrap();
+    pub fn get_from_file(file_path: impl Into<String>) -> MazeTable {
+        let lines = MazeFileReader::read(file_path.into()).unwrap();
         let table = Vec::from(lines);
 
         MazeTable(table)
