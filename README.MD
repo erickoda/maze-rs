@@ -29,7 +29,7 @@ The maze is a N*N matrix stored in a .txt file and each character can assume one
 - [x] Add Faster Path Finding Animation
 - [x] Fix Maze Rotation
 - [x] User Control The Speed of Maze's Path Finding Animation
-- [ ] Create Plugins to Make Code Cleaner
+- [x] Create Plugins to Make Code Cleaner
 - [ ] Create Random Mazes (Optional)
 - [ ] Create more generic way to store and read the mazes (Optional)
 - [ ] Implement more search algorithms (Optional)
