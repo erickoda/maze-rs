@@ -1,10 +1,19 @@
 use bevy::prelude::*;
 
-pub fn spawn_camera(mut commands: Commands) {
+pub struct CameraPlugin;
+
+impl Plugin for CameraPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, spawn_camera)
+            .add_systems(Update, move_camera);
+    }
+}
+
+fn spawn_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle { ..default() });
 }
 
-pub fn move_camera(
+fn move_camera(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<&mut Transform, With<Camera>>,
 ) {

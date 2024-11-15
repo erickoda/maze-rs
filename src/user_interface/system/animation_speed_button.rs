@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 
 use crate::{
-    search::systems::recolor::{MazeAnimationSpeed, RecolorSpeedChanger},
+    search::systems::recolor::{
+        components::maze_animation_speed::MazeAnimationSpeed,
+        resources::maze_animation_speed_changer::MazeAnimationSpeedChanger,
+    },
     user_interface::entity::SpeedBar,
 };
 
@@ -19,7 +22,7 @@ pub fn change_speed_bar_length(
 
 pub fn change_speed_of_search_animation(
     interaction_query: Query<
-        (&Interaction, &RecolorSpeedChanger),
+        (&Interaction, &MazeAnimationSpeedChanger),
         (Changed<Interaction>, With<Button>),
     >,
     mut animation_speed: ResMut<MazeAnimationSpeed>,
@@ -30,10 +33,10 @@ pub fn change_speed_of_search_animation(
         }
 
         match speed_changer {
-            RecolorSpeedChanger::Slower => {
+            MazeAnimationSpeedChanger::Slower => {
                 animation_speed.slower();
             }
-            RecolorSpeedChanger::Faster => {
+            MazeAnimationSpeedChanger::Faster => {
                 animation_speed.faster();
             }
         }

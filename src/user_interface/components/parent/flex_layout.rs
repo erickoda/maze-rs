@@ -20,6 +20,7 @@ impl ParentFlexLayout {
         })
     }
 
+    #[allow(dead_code)]
     pub fn spawn_horizontal<'a>(commands: &'a mut Commands) -> EntityCommands<'a> {
         commands.spawn(NodeBundle {
             style: Style {

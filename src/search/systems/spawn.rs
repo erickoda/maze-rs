@@ -1,20 +1,18 @@
-use std::cmp::Ordering;
-
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
-
 use crate::{
-    maze::{table_square::MazeTableSquare, MazeSquare, MazeTable, Position},
+    maze::{board::square::MazeBoardSquare, board::MazeBoard, MazeSquare, Position},
     user_interface::theme::{
         maze_colors::{ENTRY, EXIT, PATH, VISITED, WALL},
         COMPLEMENTARY_300,
     },
 };
+use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use std::cmp::Ordering;
 
 pub fn spawn_chosen_maze(
     commands: &mut Commands,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<ColorMaterial>>,
-    maze_table: MazeTable,
+    maze_board: MazeBoard,
     windows: &mut Query<&Window>,
     asset_server: &Res<AssetServer>,
 ) {
@@ -25,13 +23,13 @@ pub fn spawn_chosen_maze(
 
     let scale = {
         match min_window_size.partial_cmp(&window_height) {
-            Some(Ordering::Equal) => min_window_size / (maze_table.0.len() as f32) * 0.60,
-            _ => min_window_size / (maze_table.0.len() as f32) * 0.85,
+            Some(Ordering::Equal) => min_window_size / (maze_board.0.len() as f32) * 0.60,
+            _ => min_window_size / (maze_board.0.len() as f32) * 0.85,
         }
     };
 
-    let width = scale * (maze_table.0.len() - 1) as f32;
-    let height = scale * (maze_table.0.len() - 1) as f32;
+    let width = scale * (maze_board.0.len() - 1) as f32;
+    let height = scale * (maze_board.0.len() - 1) as f32;
     let square_mesh = meshes.add(Rectangle::default());
     let material_empty = materials.add(PATH);
     let material_wall = materials.add(WALL);
@@ -39,9 +37,9 @@ pub fn spawn_chosen_maze(
     let material_exit = materials.add(EXIT);
     let material_path = materials.add(VISITED);
 
-    commands.insert_resource(maze_table.clone());
+    commands.insert_resource(maze_board.clone());
 
-    for (i, row) in maze_table.0.iter().enumerate() {
+    for (i, row) in maze_board.0.iter().enumerate() {
         for (j, square_role) in row.clone().iter().enumerate() {
             let translation = Vec3::new(
                 i as f32 * scale - width / 2.,
@@ -50,11 +48,11 @@ pub fn spawn_chosen_maze(
             );
 
             let material = match square_role {
-                MazeTableSquare::Empty => material_empty.clone(),
-                MazeTableSquare::Wall => material_wall.clone(),
-                MazeTableSquare::Entry => material_entry.clone(),
-                MazeTableSquare::Exit => material_exit.clone(),
-                MazeTableSquare::PathToExit => material_path.clone(),
+                MazeBoardSquare::Empty => material_empty.clone(),
+                MazeBoardSquare::Wall => material_wall.clone(),
+                MazeBoardSquare::Entry => material_entry.clone(),
+                MazeBoardSquare::Exit => material_exit.clone(),
+                MazeBoardSquare::PathToExit => material_path.clone(),
             };
 
             commands.spawn((

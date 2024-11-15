@@ -1,7 +1,7 @@
 use bevy::prelude::Component;
 
 #[derive(Clone, Debug, Component, PartialEq)]
-pub enum MazeTableSquare {
+pub enum MazeBoardSquare {
     Empty,
     Wall,
     Entry,
@@ -9,26 +9,26 @@ pub enum MazeTableSquare {
     PathToExit,
 }
 
-impl MazeTableSquare {
+impl MazeBoardSquare {
     pub fn generate_random() -> Self {
         let random = rand::random::<usize>() % 2;
 
         match random {
-            0 => MazeTableSquare::Empty,
-            1 => MazeTableSquare::Wall,
+            0 => MazeBoardSquare::Empty,
+            1 => MazeBoardSquare::Wall,
             _ => unreachable!(),
         }
     }
 }
 
-impl From<char> for MazeTableSquare {
+impl From<char> for MazeBoardSquare {
     fn from(value: char) -> Self {
         match value {
-            '0' => MazeTableSquare::Empty,
-            '1' => MazeTableSquare::Wall,
-            '2' => MazeTableSquare::Entry,
-            '3' => MazeTableSquare::Exit,
-            '4' => MazeTableSquare::PathToExit,
+            '0' => MazeBoardSquare::Empty,
+            '1' => MazeBoardSquare::Wall,
+            '2' => MazeBoardSquare::Entry,
+            '3' => MazeBoardSquare::Exit,
+            '4' => MazeBoardSquare::PathToExit,
             _ => panic!("Invalid value for Maze"),
         }
     }

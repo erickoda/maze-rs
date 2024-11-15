@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 
-use super::table_square::MazeTableSquare;
+use super::board::square::MazeBoardSquare;
 
 pub struct MazeFileReader;
 
@@ -23,7 +23,7 @@ impl MazeFileReader {
     }
 }
 
-impl From<MazeString> for Vec<Vec<MazeTableSquare>> {
+impl From<MazeString> for Vec<Vec<MazeBoardSquare>> {
     fn from(maze_string: MazeString) -> Self {
         let mut map = Vec::new();
         let mut transpose_map = Vec::new();
@@ -32,7 +32,7 @@ impl From<MazeString> for Vec<Vec<MazeTableSquare>> {
             let mut row = Vec::new();
 
             for position in line.chars() {
-                row.push(MazeTableSquare::from(position));
+                row.push(MazeBoardSquare::from(position));
             }
 
             map.push(row);

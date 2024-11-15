@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::user_interface::MainMenu;
+use crate::user_interface::entity::MainMenu;
 
 pub fn toggle_ui_visibility_when_press_escape(
     input: Res<ButtonInput<KeyCode>>,

@@ -1,25 +1,25 @@
-use std::collections::VecDeque;
-
-use bevy::prelude::*;
-
+use super::systems::maze_board_tasks::{
+    send::send_maze_board_background_task, MazeBoardTasks, MazeBoardTasksController,
+};
 use crate::{
-    maze::{MazeTable, Position},
+    maze::{
+        board::{path::Path, MazeBoard},
+        Position,
+    },
     user_interface::theme::maze_colors::CURRENT,
 };
-
-use super::systems::{
-    recolor::Path, send_maze_table_background_task, MazeTableTasks, MazeTableTasksController,
-};
+use bevy::prelude::*;
+use std::collections::VecDeque;
 
 pub fn a_star(
-    maze_table: MazeTable,
-    maze_tasks_channel: &Res<MazeTableTasksController>,
+    maze_board: MazeBoard,
+    maze_tasks_channel: &Res<MazeBoardTasksController>,
 ) -> Option<Path> {
     let mut found_path_to_exit_maze: Option<Path> = None;
     let mut visited_paths_queue: Vec<PathWithCost> = Vec::new();
 
-    let exit = maze_table.get_exit();
-    let entry = maze_table.get_entry();
+    let exit = maze_board.get_exit();
+    let entry = maze_board.get_entry();
 
     if exit.is_none() || entry.is_none() {
         return None;
@@ -55,13 +55,13 @@ pub fn a_star(
         }
 
         // Color the current path
-        send_maze_table_background_task(
+        send_maze_board_background_task(
             maze_tasks_channel,
-            MazeTableTasks::Update((actual_best_path.positions.clone(), CURRENT)),
+            MazeBoardTasks::Update((actual_best_path.positions.clone(), CURRENT)),
         );
 
         // Get neighborhood
-        let neighborhood = maze_table.get_empty_neighborhood(&last_position);
+        let neighborhood = maze_board.get_empty_neighborhood(&last_position);
 
         // Get neighborhood that wasn't visit in current path
         let not_visited_neighborhood = neighborhood
